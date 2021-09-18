@@ -76,7 +76,7 @@ def Boltz(x):
     #     prob = np.ones(tick_num**2)/tick_num**2
     return prob
 
-
+# Convert to the joint action vector, ask_tick and bid_tick are for agent 1
 def gen_act(C, ask_tick, bid_tick):
     ind = np.cumsum(C)
     action = np.zeros(n_agents)

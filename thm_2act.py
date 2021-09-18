@@ -51,11 +51,10 @@ SHTwo = np.zeros_like(x)
 for k in range(len(x)):
     SHTwo[k] = poly(x[k])/temper
 
-space[0] = 0.5
-space[1] = 0.9
-temper = 0.05
-weights[0] = 0.02
-weights[1] = 0.04
+space[0] = 0.41
+space[1] = 0.8
+temper = 0.01
+
 
 PD = np.zeros_like(x)
 for k in range(len(x)):
