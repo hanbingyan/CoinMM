@@ -16,25 +16,29 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 lr = 100000
-n_periods = 4000000
+
+# Use 2000000 for Fig. 2 and 3
+n_periods = 2000000
 
 eps = 1e-5
 DELTA = 0.0
 
 n_agents = 2
-tick_num = 4
+tick_num = 2
 
 sig = 0.1
-inven_factor = 0.1
+# Set to 0.0 for Fig.3
+inven_factor = 0.0
 temper = 0.1
 
-# weights = np.zeros(tick_num)
-# space = np.zeros(tick_num)
-# space[0] = 0.1
-# space[1] = 0.8
+# Comment out to replicate ask/bid spreads case in Fig.2 and 3
+weights = np.zeros(tick_num)
+space = np.zeros(tick_num)
+space[0] = 0.1
+space[1] = 0.8
 
-space = np.linspace(0.1, 0.5, tick_num)
-weights = np.linspace(0.0, 0.1, tick_num)
+# space = np.linspace(0.1, 0.5, tick_num)
+# weights = np.linspace(0.0, 0.1, tick_num)
 
 n_instance = 10
 
@@ -58,16 +62,7 @@ def reward_cal(action):
     return winner, reward
 
 
-# def eps_greedy(agent, Q, steps_done):
-#     sample = np.random.rand()
-#     eps_threshold = np.exp(-eps * steps_done)
-#     if sample > eps_threshold:
-#         return Q[agent].argmax()
-#     else:
-#         return np.random.randint(0, tick_num ** 2, 1, dtype=int)
-
-
-def boltz_select(agent, Q, temperature):
+def boltz_select(agent, Q):
     prob = np.exp(Q[agent] / temper)
     prob = prob / np.sum(prob)
     return np.random.choice(tick_num ** 2, 1, p=prob)
@@ -87,9 +82,6 @@ for sess in range(n_instance):
     inventory = np.zeros(n_agents)
 
     Q = np.zeros((n_agents, tick_num ** 2))
-    # Q = np.random.rand(n_agents, tick_num**2)
-    # vol_counter = np.zeros(n_periods)
-    # hist = np.zeros((n_periods, n_agents))
 
     epiQ_hist = []
     epiI_hist = []
@@ -98,13 +90,12 @@ for sess in range(n_instance):
         action = np.zeros(n_agents, dtype=int)
 
         for i in range(n_agents):
-        #     if inventory[i] > 100:
-        #         action[i] = 1
-        #     elif inventory[i] < -100:
-        #         action[i] = 2
-        #     else:
-                # action[i] = eps_greedy(i, Q, steps_done)
-            action[i] = boltz_select(i, Q, temper)
+            if inventory[i] > 100:
+                action[i] = 1
+            elif inventory[i] < -100:
+                action[i] = 2
+            else:
+                action[i] = boltz_select(i, Q)
 
         ask_action = (action // tick_num).astype(int)
         bid_action = (action % tick_num).astype(int)
@@ -137,13 +128,6 @@ for sess in range(n_instance):
 
         new_heat = Q.argmax(1)
 
-        # if steps_done >= 2:
-        #     LHS = np.max(np.abs(Q_hist[steps_done] - Q_hist[steps_done - 1]))
-        #     RHS = np.max(np.abs(Q_hist[steps_done - 1] - Q_hist[steps_done - 2]))
-        #     # if LHS < RHS:
-        #     vol_counter[steps_done] = LHS / RHS
-        # hist[int(steps_done % n_periods), :] = action
-
         if np.sum(np.abs(old_heat - new_heat)) == 0:
             count += 1
         else:
@@ -161,9 +145,6 @@ for sess in range(n_instance):
             print('Q', Q)
             # break
 
-        # print(np.sum(vol_counter == 1)/steps_done)
-        # print(np.sum(vol_counter[int(0.9*steps_done):] == 1) /0.9/steps_done)
-
     Q_last[sess, :, :] = Q
     Q_hist.append(epiQ_hist)
     inventory_hist.append(epiI_hist)
@@ -175,8 +156,24 @@ print('Mean values of Q', Q_mean)
 print('Variance of Q', Q_last.var(0))
 print('Probability of actions', prob)
 
-with open('Q_2Multi.pickle', 'wb') as fp:
+
+# For Fig.2
+# with open('Q_stag.pickle', 'wb') as fp:
+#     pickle.dump(np.array(Q_hist), fp)
+#
+# with open('inven_stag.pickle', 'wb') as fp:
+#     pickle.dump(np.array(inventory_hist), fp)
+
+# For Fig. 3
+with open('Q_hard.pickle', 'wb') as fp:
     pickle.dump(np.array(Q_hist), fp)
 
-with open('invent_2Multi.pickle', 'wb') as fp:
+with open('inven_hard.pickle', 'wb') as fp:
     pickle.dump(np.array(inventory_hist), fp)
+
+# For Fig. 7
+# with open('Q_AB.pickle', 'wb') as fp:
+#     pickle.dump(np.array(Q_hist), fp)
+#
+# with open('inven_AB.pickle', 'wb') as fp:
+#     pickle.dump(np.array(inventory_hist), fp)

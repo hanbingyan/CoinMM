@@ -1,0 +1,2 @@
+Params setting 
+Delta 0.0, inven_factor 0.1, temper 0.01

@@ -1,4 +1,4 @@
-# Simulation of Ask or Bid with multi-agents
+# Simulation of one side with multi-agents
 import numpy as np
 import copy
 import pickle
@@ -82,9 +82,6 @@ for sess in range(n_instance):
 
     epiQ_hist = []
 
-    # vol_counter = np.zeros(n_periods)
-    # hist = np.zeros((n_periods, n_agents))
-
     for i_episode in range(n_periods + 1):
         # For each agent, select and perform an action
         action = np.zeros(n_agents, dtype=int)
@@ -107,20 +104,6 @@ for sess in range(n_instance):
 
         new_heat = Q.argmax(1)
 
-        #         if steps_done >=2:
-        #             LHS = np.max(np.abs(Q_hist[steps_done] - Q_hist[steps_done - 1]))
-        #             RHS = np.max(np.abs(Q_hist[steps_done - 1] - Q_hist[steps_done - 2]))
-        #             # if LHS < RHS:
-        #             vol_counter[steps_done] = LHS/RHS
-        #             # else:
-        #             #     vol_counter[steps_done] = -1
-
-        #         if steps_done%10000 == 0:
-        #             print('LHS/RHS', LHS, RHS, LHS/RHS)
-
-
-        # hist[int(steps_done % n_periods), :] = action
-
         if np.sum(np.abs(old_heat - new_heat)) == 0:
             count += 1
         else:
@@ -133,13 +116,7 @@ for sess in range(n_instance):
             print('Q', Q)
             print('Action', space[action])
 
-        # if steps_done > 0 and steps_done%n_periods == 0:
-        #             act_max = np.unique(hist, return_counts=True, axis = 0)[1].max()
 
-        #             print("act_max", act_max)
-        #             print("ask_dist", np.unique(hist, return_counts=True, axis = 0)[1])
-
-        # if act_max/n_periods > 0.9:
         if count == 1000000:
             print(bcolors.RED, sess, 'Terminate condition satisfied.' + bcolors.ENDC)
             print('Q', Q)
@@ -147,8 +124,7 @@ for sess in range(n_instance):
 
     Q_last[sess, :, :] = Q
     Q_hist.append(epiQ_hist)
-            # print(np.sum(vol_counter == 1)/steps_done)
-            # print(np.sum(vol_counter[int(0.9*steps_done):] == 1) /0.9/steps_done)
+
 with open('Q_oneside.pickle', 'wb') as fp:
     pickle.dump(np.array(Q_hist), fp)
 
